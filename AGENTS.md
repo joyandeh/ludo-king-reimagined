@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Keep the game in a width-constrained portrait layout and a board-plus-controls landscape layout on short screens so play remains visible without horizontal scrolling.
