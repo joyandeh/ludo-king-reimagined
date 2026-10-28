@@ -5,6 +5,8 @@ import {
   initialState, cellOf, canMove, applyMove, botChoose,
 } from "@/lib/ludo";
 import { sfx, toggleMusic } from "@/lib/sound";
+import { Button } from "@/components/ui/button";
+import { Music2, VolumeX, RotateCcw } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -118,18 +120,18 @@ function Game() {
   });
 
   return (
-    <main className="min-h-screen bg-background text-foreground flex flex-col items-center px-3 py-6 gap-4">
-      <header className="flex w-full max-w-[560px] items-center justify-between">
-        <h1 className="font-display text-3xl tracking-wide text-primary">Ludo Royale</h1>
-        <div className="flex gap-2">
-          <button className="rounded-full bg-secondary px-4 py-2 text-sm font-bold text-secondary-foreground" onClick={() => { setMusic(!music); toggleMusic(!music); }}>
-            {music ? "♫ Music on" : "♫ Music off"}
-          </button>
-          <button className="rounded-full bg-secondary px-4 py-2 text-sm font-bold text-secondary-foreground" onClick={restart}>New game</button>
+    <main className="game-layout bg-background text-foreground">
+      <header className="game-header grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
+        <h1 className="min-w-0 font-display text-2xl text-primary sm:text-3xl">Ludo Royale</h1>
+        <div className="flex shrink-0 gap-2">
+          <Button variant="secondary" size="icon" className="h-11 w-11" aria-label={music ? "Turn music off" : "Turn music on"} aria-pressed={music} title={music ? "Turn music off" : "Turn music on"} onClick={() => { setMusic(!music); toggleMusic(!music); }}>
+            {music ? <Music2 /> : <VolumeX />}
+          </Button>
+          <Button variant="secondary" size="icon" className="h-11 w-11" aria-label="New game" title="New game" onClick={restart}><RotateCcw /></Button>
         </div>
       </header>
 
-      <div className="relative aspect-square w-full max-w-[560px] rounded-2xl bg-board p-2 shadow-board">
+      <div className="game-board relative aspect-square rounded-2xl bg-board p-2 shadow-board">
         <div className="relative grid h-full w-full grid-cols-[repeat(15,1fr)] grid-rows-[repeat(15,1fr)] gap-px">
           {Array.from({ length: 225 }).map((_, k) => {
             const r = Math.floor(k / 15), c = k % 15;
@@ -169,28 +171,28 @@ function Game() {
         </div>
       </div>
 
-      <div className="flex w-full max-w-[560px] items-center justify-between gap-4 rounded-2xl bg-card p-4 shadow-board">
-        <div>
+      <div className="game-status grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-lg bg-card p-3 shadow-board">
+        <div className="min-w-0">
           <div className={`text-sm font-bold uppercase text-${color}`}>{color === HUMAN ? "Your" : NAMES[color] + "'s"} turn</div>
-          <div className="text-muted-foreground">{winner ? `${NAMES[winner]} won! 🎉` : msg}</div>
+          <div className="break-words text-sm text-muted-foreground sm:text-base" aria-live="polite">{winner ? `${NAMES[winner]} won! 🎉` : msg}</div>
         </div>
-        <button
+        <Button variant="outline"
           onClick={() => color === HUMAN && roll()}
           disabled={color !== HUMAN || dice != null || !!winner}
-          className={`dice grid grid-cols-3 grid-rows-3 gap-1 p-2 ${rolling ? "animate-dice" : ""} ${color === HUMAN && dice == null && !winner ? "ring-4 ring-primary" : ""}`}
+          className={`dice shrink-0 grid grid-cols-3 grid-rows-3 gap-1 p-2 ${rolling ? "animate-dice" : ""} ${color === HUMAN && dice == null && !winner ? "ring-4 ring-primary" : ""}`}
           aria-label="Roll dice"
         >
           {Array.from({ length: 9 }).map((_, k) => (
             <span key={k} className={`rounded-full ${PIP[dice ?? 6]!.includes(k) ? "bg-foreground" : ""}`} />
           ))}
-        </button>
+        </Button>
       </div>
 
       {winner && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/60">
-          <div className="rounded-3xl bg-card p-8 text-center shadow-board">
+          <div className="mx-4 max-w-full rounded-lg bg-card p-6 text-center shadow-board">
             <div className="font-display text-4xl text-primary">{winner === HUMAN ? "You win!" : `${NAMES[winner]} wins`}</div>
-            <button onClick={restart} className="mt-6 rounded-full bg-primary px-6 py-3 font-bold text-primary-foreground">Play again</button>
+            <Button onClick={restart} className="mt-6 h-11 px-6 font-bold">Play again</Button>
           </div>
         </div>
       )}
