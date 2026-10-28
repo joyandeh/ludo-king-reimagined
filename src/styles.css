@@ -267,3 +267,6 @@ main > header h1, main > header { color: var(--primary); }
   .player-dice { width: 32px; height: 32px; }
   .player-identity strong { font-size: 11px; }
 }
+@media (prefers-reduced-motion: reduce) {
+  .token.token-active, .animate-dice { animation: none; }
+}
