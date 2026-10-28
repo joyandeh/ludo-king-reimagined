@@ -42,8 +42,8 @@ export function cellOf(color: Color, progress: number, idx: number): [number, nu
     const [r, c] = BASE_ORIGIN[color];
     return [r + 1.5 + Math.floor(idx / 2) * 2, c + 1.5 + (idx % 2) * 2];
   }
-  if (progress <= 50) return TRACK[(START[color] + progress) % 52];
-  if (progress < FINISH) return HOME_COL[color][progress - 51];
+  if (progress <= 50) return TRACK[(START[color] + progress) % 52]!;
+  if (progress < FINISH) return HOME_COL[color][progress - 51]!;
   return CENTER[color];
 }
 
@@ -65,7 +65,7 @@ export function canMove(p: number, dice: number) {
 
 export function applyMove(s: State, color: Color, i: number, dice: number) {
   const next: State = JSON.parse(JSON.stringify(s));
-  const p = next[color][i];
+  const p = next[color][i]!;
   const np = p < 0 ? 0 : p + dice;
   next[color][i] = np;
   let captured = false;
@@ -83,19 +83,19 @@ export function applyMove(s: State, color: Color, i: number, dice: number) {
 }
 
 export function botChoose(s: State, color: Color, dice: number): number {
-  const opts = s[color].map((p, i) => i).filter((i) => canMove(s[color][i], dice));
+  const opts = s[color].map((p, i) => i).filter((i) => canMove(s[color][i]!, dice));
   let best = opts[0], score = -Infinity;
   for (const i of opts) {
     const r = applyMove(s, color, i, dice);
-    const p = s[color][i];
+    const p = s[color][i]!;
     let sc = Math.random();
     if (r.captured) sc += 100;
     if (r.finished) sc += 60;
     if (p < 0) sc += 40;
-    const ti = trackIndex(color, r.state[color][i]);
+    const ti = trackIndex(color, r.state[color][i]!);
     if (SAFE.has(ti)) sc += 20;
     sc += p / 10;
     if (sc > score) { score = sc; best = i; }
   }
-  return best;
+  return best!;
 }

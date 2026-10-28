@@ -31,8 +31,8 @@ export function toggleMusic(on: boolean) {
   if (!on) return;
   let i = 0;
   musicTimer = window.setInterval(() => {
-    tone(MELODY[i % MELODY.length], 0.3, "sine", 0.04);
-    if (i % 4 === 0) tone(MELODY[i % MELODY.length] / 2, 0.6, "triangle", 0.035);
+    tone(MELODY[i % MELODY.length]!, 0.3, "sine", 0.04);
+    if (i % 4 === 0) tone(MELODY[i % MELODY.length]! / 2, 0.6, "triangle", 0.035);
     i++;
   }, 280);
 }
