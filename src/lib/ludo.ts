@@ -82,13 +82,16 @@ export function applyMove(s: State, color: Color, i: number, dice: number) {
   return { state: next, captured, finished: np === FINISH };
 }
 
-export function botChoose(s: State, color: Color, dice: number): number {
+export type Difficulty = "easy" | "normal" | "hard";
+
+export function botChoose(s: State, color: Color, dice: number, level: Difficulty = "normal"): number {
   const opts = s[color].map((p, i) => i).filter((i) => canMove(s[color][i]!, dice));
+  if (level === "easy") return opts[Math.floor(Math.random() * opts.length)]!;
   let best = opts[0], score = -Infinity;
   for (const i of opts) {
     const r = applyMove(s, color, i, dice);
     const p = s[color][i]!;
-    let sc = Math.random();
+    let sc = level === "hard" ? 0 : Math.random() * 30;
     if (r.captured) sc += 100;
     if (r.finished) sc += 60;
     if (p < 0) sc += 40;
