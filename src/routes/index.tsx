@@ -35,6 +35,11 @@ function Game() {
   const [music, setMusic] = useState(false);
   const [msg, setMsg] = useState("Tap the dice to roll!");
   const busy = useRef(false);
+  const [tick, setTick] = useState(0);
+  const [face, setFace] = useState(6);
+  const sixes = useRef(0);
+  const epoch = useRef(0);
+  const later = (fn: () => void, ms: number) => { const e = epoch.current; setTimeout(() => { if (e === epoch.current) fn(); }, ms); };
   const color = COLORS[turn] ?? HUMAN;
 
   useEffect(() => () => toggleMusic(false), []);
@@ -42,8 +47,8 @@ function Game() {
   const nextTurn = (extra: boolean) => {
     setDice(null);
     busy.current = false;
-    if (!extra) setTurn((t) => (t + 1) % 4);
-    else setTurn((t) => t);
+    if (!extra) { sixes.current = 0; setTurn((t) => (t + 1) % 4); }
+    setTick((k) => k + 1);
   };
 
   const doMove = (s: State, c: Color, i: number, d: number) => {
@@ -53,7 +58,7 @@ function Game() {
     else if (r.finished) sfx.home();
     else sfx.move();
     if (r.state[c].every((p) => p === FINISH)) { setWinner(c); sfx.win(); return; }
-    setTimeout(() => nextTurn(d === 6 || r.captured || r.finished), 450);
+    later(() => nextTurn(d === 6 || r.captured || r.finished), 450);
   };
 
   const roll = () => {
@@ -61,24 +66,31 @@ function Game() {
     busy.current = true;
     setRolling(true);
     sfx.roll();
-    setTimeout(() => {
+    const spin = setInterval(() => setFace(1 + Math.floor(Math.random() * 6)), 70);
+    later(() => {
+      clearInterval(spin);
       const d = 1 + Math.floor(Math.random() * 6);
       setRolling(false);
       setDice(d);
       if (d === 6) sfx.six();
       const c = COLORS[turn] ?? HUMAN;
+      if (d === 6 && ++sixes.current === 3) {
+        setMsg(`${NAMES[c]} rolled three 6s — turn lost`);
+        later(() => nextTurn(false), 900);
+        return;
+      }
       const movable = state[c].map((p, i) => canMove(p, d) ? i : -1).filter((i) => i >= 0);
       if (movable.length === 0) {
         setMsg(`${NAMES[c]} rolled ${d} — no moves`);
-        setTimeout(() => nextTurn(false), 800);
+        later(() => nextTurn(false), 800);
         return;
       }
       setMsg(`${NAMES[c]} rolled ${d}`);
       if (c !== HUMAN) {
-        setTimeout(() => doMove(state, c, botChoose(state, c, d), d), 600);
+        later(() => doMove(state, c, botChoose(state, c, d), d), 600);
       } else if (movable.length === 1) {
         const onlyMove = movable[0];
-        if (onlyMove !== undefined) setTimeout(() => doMove(state, c, onlyMove, d), 350);
+        if (onlyMove !== undefined) later(() => doMove(state, c, onlyMove, d), 350);
       }
     }, 550);
   };
@@ -88,7 +100,7 @@ function Game() {
     const t = setTimeout(roll, 700);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [turn, winner, state === state]);
+  }, [turn, winner, tick]);
 
   const clickToken = (c: Color, i: number) => {
     if (c !== HUMAN || color !== HUMAN || dice == null || rolling) return;
@@ -99,7 +111,7 @@ function Game() {
     doMove(state, c, i, d);
   };
 
-  const restart = () => { setState(initialState()); setTurn(0); setDice(null); setWinner(null); busy.current = false; };
+  const restart = () => { epoch.current++; sixes.current = 0; setRolling(false); setMsg("Your turn — tap the dice!"); setState(initialState()); setTurn(0); setDice(null); setWinner(null); busy.current = false; };
 
   // Board cells
   const cellClass = (r: number, c: number) => {
@@ -135,7 +147,7 @@ function Game() {
 
       <div className="game-arena">
         <div className="player-row">
-          {(["red", "green"] as Color[]).map((c) => <PlayerPanel key={c} color={c} name={NAMES[c]} active={color === c} human={c === HUMAN} dice={dice} rolling={rolling} disabled={c !== HUMAN || color !== HUMAN || dice != null || rolling || !!winner} finished={state[c].filter((p) => p === FINISH).length} onRoll={roll} />)}
+          {(["red", "green"] as Color[]).map((c) => <PlayerPanel key={c} color={c} name={NAMES[c]} active={color === c} human={c === HUMAN} dice={rolling ? face : dice} rolling={rolling} disabled={c !== HUMAN || color !== HUMAN || dice != null || rolling || !!winner} finished={state[c].filter((p) => p === FINISH).length} onRoll={roll} />)}
         </div>
       <div className="game-board relative aspect-square bg-board shadow-board">
         <div className="board-grid relative grid h-full w-full grid-cols-[repeat(15,1fr)] grid-rows-[repeat(15,1fr)]">
@@ -179,7 +191,7 @@ function Game() {
         </div>
       </div>
         <div className="player-row">
-          {(["blue", "yellow"] as Color[]).map((c) => <PlayerPanel key={c} color={c} name={NAMES[c]} active={color === c} human={false} dice={dice} rolling={rolling} disabled finished={state[c].filter((p) => p === FINISH).length} onRoll={roll} />)}
+          {(["blue", "yellow"] as Color[]).map((c) => <PlayerPanel key={c} color={c} name={NAMES[c]} active={color === c} human={false} dice={rolling ? face : dice} rolling={rolling} disabled finished={state[c].filter((p) => p === FINISH).length} onRoll={roll} />)}
         </div>
       </div>
 
