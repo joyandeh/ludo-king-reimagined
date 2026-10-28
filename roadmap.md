@@ -1,3 +1,3 @@
 # Game detail update
-- [ ] Match the reference's pawn shapes, dice, and player presentation.
-- [ ] Verify dice and pawn interaction at desktop and phone sizes.
+- [x] Add reference-style raised pawns, white pip dice, and color-coded player portraits (approximation; live reference gameplay did not load).
+- [x] Verify rolling a six, selecting and moving a pawn, music, and desktop/phone fit.
