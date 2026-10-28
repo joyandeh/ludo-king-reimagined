@@ -33,7 +33,7 @@ function Game() {
   const [music, setMusic] = useState(false);
   const [msg, setMsg] = useState("Tap the dice to roll!");
   const busy = useRef(false);
-  const color = COLORS[turn];
+  const color = COLORS[turn]!;
 
   useEffect(() => () => toggleMusic(false), []);
 
@@ -64,8 +64,8 @@ function Game() {
       setRolling(false);
       setDice(d);
       if (d === 6) sfx.six();
-      const c = COLORS[turn];
-      const movable = state[c].map((_, i) => i).filter((i) => canMove(state[c][i], d));
+      const c = COLORS[turn]!;
+      const movable = state[c].map((_, i) => i).filter((i) => canMove(state[c][i]!, d));
       if (movable.length === 0) {
         setMsg(`${NAMES[c]} rolled ${d} — no moves`);
         setTimeout(() => nextTurn(false), 800);
@@ -75,7 +75,7 @@ function Game() {
       if (c !== HUMAN) {
         setTimeout(() => doMove(state, c, botChoose(state, c, d), d), 600);
       } else if (movable.length === 1) {
-        setTimeout(() => doMove(state, c, movable[0], d), 350);
+        setTimeout(() => doMove(state, c, movable[0]!, d), 350);
       }
     }, 550);
   };
@@ -89,7 +89,7 @@ function Game() {
 
   const clickToken = (c: Color, i: number) => {
     if (c !== HUMAN || color !== HUMAN || dice == null || rolling) return;
-    if (!canMove(state[c][i], dice)) return;
+    if (!canMove(state[c][i]!, dice)) return;
     const d = dice;
     setDice(null);
     doMove(state, c, i, d);
@@ -152,7 +152,7 @@ function Game() {
           })}
           <div className="absolute left-[40%] top-[40%] h-[20%] w-[20%] center-tri" />
           {tokens.map(({ c, i, r, col, offset }) => {
-            const active = c === HUMAN && color === HUMAN && dice != null && canMove(state[c][i], dice);
+            const active = c === HUMAN && color === HUMAN && dice != null && canMove(state[c][i]!, dice);
             return (
               <button
                 key={`${c}${i}`}
@@ -181,7 +181,7 @@ function Game() {
           aria-label="Roll dice"
         >
           {Array.from({ length: 9 }).map((_, k) => (
-            <span key={k} className={`rounded-full ${PIP[dice ?? 6].includes(k) ? "bg-foreground" : ""}`} />
+            <span key={k} className={`rounded-full ${PIP[dice ?? 6]!.includes(k) ? "bg-foreground" : ""}`} />
           ))}
         </button>
       </div>
