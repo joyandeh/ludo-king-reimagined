@@ -175,4 +175,4 @@ main > header h1, main > header { color: var(--primary); }
 @keyframes dice-spin { 0% { transform: rotate(0) scale(1); } 50% { transform: rotate(200deg) scale(1.15); } 100% { transform: rotate(360deg) scale(1); } }
 .animate-pulse-ring { animation: pulse-ring 1.2s infinite; }
 @keyframes pulse-ring { 50% { box-shadow: 0 0 0 6px var(--primary); } }
-.center-tri { background: conic-gradient(from 45deg, var(--green) 0 25%, var(--yellow) 0 50%, var(--blue) 0 75%, var(--red) 0 100%); }
+.center-tri { background: conic-gradient(from -45deg, var(--green) 0 25%, var(--yellow) 0 50%, var(--blue) 0 75%, var(--red) 0 100%); }

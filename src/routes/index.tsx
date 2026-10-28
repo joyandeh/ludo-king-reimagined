@@ -171,7 +171,7 @@ function Game() {
 
       <div className="flex w-full max-w-[560px] items-center justify-between gap-4 rounded-2xl bg-card p-4 shadow-board">
         <div>
-          <div className={`text-sm font-bold uppercase text-${color}`}>{NAMES[color]}'s turn</div>
+          <div className={`text-sm font-bold uppercase text-${color}`}>{color === HUMAN ? "Your" : NAMES[color] + "'s"} turn</div>
           <div className="text-muted-foreground">{winner ? `${NAMES[winner]} won! 🎉` : msg}</div>
         </div>
         <button
