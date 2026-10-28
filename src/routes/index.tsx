@@ -6,6 +6,7 @@ import {
 } from "@/lib/ludo";
 import { sfx, toggleMusic } from "@/lib/sound";
 import { Button } from "@/components/ui/button";
+import { Pawn, PlayerPanel } from "@/components/game-pieces";
 import { Music2, VolumeX, RotateCcw } from "lucide-react";
 
 export const Route = createFileRoute("/")({
@@ -24,7 +25,6 @@ export const Route = createFileRoute("/")({
 
 const HUMAN: Color = "red";
 const NAMES: Record<Color, string> = { red: "You", green: "Bot Jade", yellow: "Bot Sunny", blue: "Bot Wave" };
-const PIP: Record<number, number[]> = { 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
 
 function Game() {
   const [state, setState] = useState<State>(initialState);
@@ -35,7 +35,7 @@ function Game() {
   const [music, setMusic] = useState(false);
   const [msg, setMsg] = useState("Tap the dice to roll!");
   const busy = useRef(false);
-  const color = COLORS[turn]!;
+  const color = COLORS[turn] ?? HUMAN;
 
   useEffect(() => () => toggleMusic(false), []);
 
@@ -66,8 +66,8 @@ function Game() {
       setRolling(false);
       setDice(d);
       if (d === 6) sfx.six();
-      const c = COLORS[turn]!;
-      const movable = state[c].map((_, i) => i).filter((i) => canMove(state[c][i]!, d));
+      const c = COLORS[turn] ?? HUMAN;
+      const movable = state[c].map((p, i) => canMove(p, d) ? i : -1).filter((i) => i >= 0);
       if (movable.length === 0) {
         setMsg(`${NAMES[c]} rolled ${d} — no moves`);
         setTimeout(() => nextTurn(false), 800);
@@ -77,7 +77,8 @@ function Game() {
       if (c !== HUMAN) {
         setTimeout(() => doMove(state, c, botChoose(state, c, d), d), 600);
       } else if (movable.length === 1) {
-        setTimeout(() => doMove(state, c, movable[0]!, d), 350);
+        const onlyMove = movable[0];
+        if (onlyMove !== undefined) setTimeout(() => doMove(state, c, onlyMove, d), 350);
       }
     }, 550);
   };
@@ -91,7 +92,8 @@ function Game() {
 
   const clickToken = (c: Color, i: number) => {
     if (c !== HUMAN || color !== HUMAN || dice == null || rolling) return;
-    if (!canMove(state[c][i]!, dice)) return;
+    const progress = state[c][i];
+    if (progress === undefined || !canMove(progress, dice)) return;
     const d = dice;
     setDice(null);
     doMove(state, c, i, d);
@@ -131,15 +133,19 @@ function Game() {
         </div>
       </header>
 
-      <div className="game-board relative aspect-square rounded-2xl bg-board p-2 shadow-board">
-        <div className="relative grid h-full w-full grid-cols-[repeat(15,1fr)] grid-rows-[repeat(15,1fr)] gap-px">
+      <div className="game-arena">
+        <div className="player-row">
+          {(["red", "green"] as Color[]).map((c) => <PlayerPanel key={c} color={c} name={NAMES[c]} active={color === c} human={c === HUMAN} dice={dice} rolling={rolling} disabled={c !== HUMAN || color !== HUMAN || dice != null || rolling || !!winner} finished={state[c].filter((p) => p === FINISH).length} onRoll={roll} />)}
+        </div>
+      <div className="game-board relative aspect-square bg-board shadow-board">
+        <div className="board-grid relative grid h-full w-full grid-cols-[repeat(15,1fr)] grid-rows-[repeat(15,1fr)]">
           {Array.from({ length: 225 }).map((_, k) => {
             const r = Math.floor(k / 15), c = k % 15;
             const ti = TRACK.findIndex(([a, b]) => a === r && b === c);
             return (
-              <div key={k} className={`relative rounded-[3px] ${cellClass(r, c)}`}>
-                {ti >= 0 && SAFE.has(ti) && !Object.values(START).includes(ti) && (
-                  <span className="absolute inset-0 flex items-center justify-center text-muted-foreground text-xs">★</span>
+              <div key={k} className={`board-cell relative ${cellClass(r, c)}`}>
+                {ti >= 0 && SAFE.has(ti) && (
+                  <svg viewBox="0 0 24 24" className="safe-star" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9Z" /></svg>
                 )}
               </div>
             );
@@ -147,45 +153,41 @@ function Game() {
           {COLORS.map((c) => {
             const pos = { red: "top-0 left-0", green: "top-0 right-0", yellow: "bottom-0 right-0", blue: "bottom-0 left-0" }[c];
             return (
-              <div key={c} className={`absolute ${pos} h-[40%] w-[40%] rounded-xl bg-${c} p-[12%] ${color === c ? "animate-pulse-ring" : ""}`}>
-                <div className="h-full w-full rounded-lg bg-card" />
+              <div key={c} className={`home-zone absolute ${pos} h-[40%] w-[40%] bg-${c}`}>
+                <div className="home-court bg-card" />
+                {[0, 1, 2, 3].map((i) => <span key={i} className={`home-seat home-seat-${i} text-${c}`} />)}
               </div>
             );
           })}
           <div className="absolute left-[40%] top-[40%] h-[20%] w-[20%] center-tri" />
           {tokens.map(({ c, i, r, col, offset }) => {
-            const active = c === HUMAN && color === HUMAN && dice != null && canMove(state[c][i]!, dice);
+            const progress = state[c][i];
+            const active = c === HUMAN && color === HUMAN && dice != null && progress !== undefined && canMove(progress, dice);
             return (
-              <button
+              <Button variant="ghost"
                 key={`${c}${i}`}
                 onClick={() => clickToken(c, i)}
-                className={`token bg-${c} ${active ? "token-active" : ""}`}
+                className={`token ${active ? "token-active" : ""}`}
                 style={{
                   top: `calc(${(r / 15) * 100}% + ${offset * 3}px)`,
                   left: `calc(${(col / 15) * 100}% + ${offset * 3}px)`,
                 }}
                 aria-label={`${c} token ${i + 1}`}
-              />
+              ><Pawn color={c} id={`${c}-${i}`} /></Button>
             );
           })}
         </div>
       </div>
+        <div className="player-row">
+          {(["blue", "yellow"] as Color[]).map((c) => <PlayerPanel key={c} color={c} name={NAMES[c]} active={color === c} human={false} dice={dice} rolling={rolling} disabled finished={state[c].filter((p) => p === FINISH).length} onRoll={roll} />)}
+        </div>
+      </div>
 
-      <div className="game-status grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-lg bg-card p-3 shadow-board">
+      <div className="game-status flex items-center gap-3 bg-card p-3">
         <div className="min-w-0">
           <div className={`text-sm font-bold uppercase text-${color}`}>{color === HUMAN ? "Your" : NAMES[color] + "'s"} turn</div>
           <div className="break-words text-sm text-muted-foreground sm:text-base" aria-live="polite">{winner ? `${NAMES[winner]} won! 🎉` : msg}</div>
         </div>
-        <Button variant="outline"
-          onClick={() => color === HUMAN && roll()}
-          disabled={color !== HUMAN || dice != null || !!winner}
-          className={`dice shrink-0 grid grid-cols-3 grid-rows-3 gap-1 p-2 ${rolling ? "animate-dice" : ""} ${color === HUMAN && dice == null && !winner ? "ring-4 ring-primary" : ""}`}
-          aria-label="Roll dice"
-        >
-          {Array.from({ length: 9 }).map((_, k) => (
-            <span key={k} className={`rounded-full ${PIP[dice ?? 6]!.includes(k) ? "bg-foreground" : ""}`} />
-          ))}
-        </Button>
       </div>
 
       {winner && (
