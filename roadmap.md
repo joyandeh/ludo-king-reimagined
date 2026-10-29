@@ -3,5 +3,5 @@
 - [x] Verify rolling a six, selecting and moving a pawn, music, and desktop/phone fit.
 - [x] Arrange the home screen like the uploaded reference without changing the existing board.
 - [x] Verify both mode buttons, settings, and phone layout.
-- [ ] Fit all home elements in short and narrow phone viewports without scrolling.
-- [ ] Verify mobile touch controls and viewport resizing.
+- [x] Fit all home elements in short and narrow phone viewports without scrolling.
+- [x] Verify mobile touch controls and viewport resizing.
