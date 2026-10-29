@@ -10,33 +10,53 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ComputerRouteImport } from './routes/computer'
+import { Route as PassPlayRouteImport } from './routes/pass-play'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ComputerRoute = ComputerRouteImport.update({
+  id: '/computer',
+  path: '/computer',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PassPlayRoute = PassPlayRouteImport.update({
+  id: '/pass-play',
+  path: '/pass-play',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/computer': typeof ComputerRoute
+  '/pass-play': typeof PassPlayRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/computer': typeof ComputerRoute
+  '/pass-play': typeof PassPlayRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/computer': typeof ComputerRoute
+  '/pass-play': typeof PassPlayRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/computer' | '/pass-play'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/computer' | '/pass-play'
+  id: '__root__' | '/' | '/computer' | '/pass-play'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ComputerRoute: typeof ComputerRoute
+  PassPlayRoute: typeof PassPlayRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +68,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/computer': {
+      id: '/computer'
+      path: '/computer'
+      fullPath: '/computer'
+      preLoaderRoute: typeof ComputerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pass-play': {
+      id: '/pass-play'
+      path: '/pass-play'
+      fullPath: '/pass-play'
+      preLoaderRoute: typeof PassPlayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ComputerRoute: ComputerRoute,
+  PassPlayRoute: PassPlayRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
