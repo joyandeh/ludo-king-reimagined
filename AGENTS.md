@@ -11,3 +11,4 @@
 
 - Keep the game in a width-constrained portrait layout and a board-plus-controls landscape layout on short screens so play remains visible without horizontal scrolling.
 - Render reusable pawn, die, and player visuals in the browser-safe game-pieces module; SVG keeps pieces crisp and dice pips stable at every board size.
+- Keep the lobby at the index route and share the existing board component between dedicated computer and local-play routes so home layout changes cannot redesign the board.

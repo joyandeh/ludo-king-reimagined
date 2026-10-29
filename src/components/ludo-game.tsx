@@ -27,7 +27,7 @@ export function Game({ passAndPlay = false }: { passAndPlay?: boolean }) {
   const epoch = useRef(0);
   const later = (fn: () => void, ms: number) => { const e = epoch.current; setTimeout(() => { if (e === epoch.current) fn(); }, ms); };
   const color = COLORS[turn] ?? HUMAN;
-  const isHuman = (c: Color) => passAndPlay || isHuman(c);
+  const isHuman = (c: Color) => passAndPlay || c === HUMAN;
 
   useEffect(() => () => toggleMusic(false), []);
 
@@ -90,7 +90,7 @@ export function Game({ passAndPlay = false }: { passAndPlay?: boolean }) {
   }, [turn, winner, tick, passAndPlay]);
 
   const clickToken = (c: Color, i: number) => {
-    if (!isHuman(c) || !isHuman(color) || dice == null || rolling) return;
+    if (!isHuman(c) || c !== color || dice == null || rolling) return;
     const progress = state[c][i];
     if (progress === undefined || !canMove(progress, dice)) return;
     const d = dice;
