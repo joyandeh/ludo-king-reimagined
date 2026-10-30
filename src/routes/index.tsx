@@ -3,8 +3,8 @@ import { useEffect, useState } from "react";
 import { Coins, Settings, Maximize, Minimize, UserRound, Star, Smartphone, Globe2, X, Music2, VolumeX, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toggleMusic } from "@/lib/sound";
-import background from "@/assets/lobby-background.jpg";
-import logo from "@/assets/lobby-logo.png";
+import background from "@/assets/lobby-reference-background.jpg";
+import logo from "@/assets/lobby-reference-logo.png";
 
 export const Route = createFileRoute("/")({
   head: () => ({ meta: [
