@@ -5,3 +5,4 @@
 - [x] Verify both mode buttons, settings, and phone layout.
 - [x] Fit all home elements in short and narrow phone viewports without scrolling.
 - [x] Verify mobile touch controls and viewport resizing.
+- [ ] Match the new uploaded home reference while preserving existing game modes and mobile fit.
